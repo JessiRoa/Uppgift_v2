@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  database:
+    build: database/
+    ports: 
+      - "5433:5432"
+
+  website:
+    depends_on:
+      - database
+    build: website/
+    ports:
+      - "80:80"
+    environment:
+      - DEBUG true
+
+  worker_alpha:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 30M
+      mode: replicated
+      replicas: 4
+    depends_on:
+      - database
+    build: 
+      context: worker/
+      args:
+        - producer=alpha
+    environment:
+      - START_NUMBER=1
+      - STEP_NUMBER=2
+
+  worker_beta:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 30M
+      mode: replicated
+      replicas: 4
+    depends_on:
+      - database
+    build: 
+      context: worker/
+      args:
+        - producer=beta
+    environment:
+      - START_NUMBER=2
+      - STEP_NUMBER=2
