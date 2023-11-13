@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primtalsfaktorisering 2.0</title>
+    <style>
+        body {
+            background-color: aquamarine;
+        }
+        div {
+            text-align: center;
+            border: 1px solid black;
+            width: 75%;
+            margin: 35px auto;
+            border-radius: 5px;
+            background-color: white;
+            padding: 10px;
+        }
+        div > div {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1>Primtalsfaktorisering v2.0</h1>
+        <p id="ui_status">-</p>
+        <div>
+            <h2>Kontrollpanel</h2>
+            <p>Senaste uppdateringen: <b id="ui_timestamp"></b></p>
+            <p id="producer_status"></p>
+            <button onclick="toggleProducers()">Start/Stop</button>
+        </div>
+        <div>
+            <h2>Resultat</h2>
+            <p>Antal resultat från alpha: <b id="ui_alphacount"></b></p>
+            <p>Antal resultat från beta: <b id="ui_betacount"></b></p>
+            <p>Största faktoriserade talet: <b id="ui_largest"></b></p>
+        </div>
+    </div>
+
+    <script>
+        const ui_status = document.querySelector('#ui_status');
+        const ui_alphacount = document.querySelector('#ui_alphacount');
+        const ui_betacount = document.querySelector('#ui_betacount');
+        const ui_largest = document.querySelector('#ui_largest');
+        const ui_timestamp = document.querySelector('#ui_timestamp');
+
+        function toggleProducers() {
+            fetch('/toggle');
+        }
+
+        function updateUI() {
+            fetch('/stats')
+            .then(response => {
+                if (!response.ok) {
+                    // throw new Error("HTTP error " + response.status);
+                    ui_status.innerText = 'Ingen kontakt med DB.';
+                }
+                ui_status.innerText = 'Kontakt med databas etablerad.';
+                return response.json();
+            })
+            .then(json => {
+                console.log(json);
+                ui_alphacount.innerText = json.alpha_count;
+                ui_betacount.innerText = json.beta_count;
+                ui_largest.innerText = json.largest_original + ' = ' + json.largest_factors;
+                ui_timestamp.innerText = json.latest;
+            })
+        }
+
+        updateUI();
+        setInterval(updateUI, 1000);
+    </script>
+</body>
+
+</html>
